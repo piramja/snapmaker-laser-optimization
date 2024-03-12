@@ -42,7 +42,7 @@ regex = re.compile(r'G1(.*?)S((?:\d{1,2}(?:\.\d+)?|0)(?=\D|$))\s')
 # Initialize a counter for the number of changed lines
 changed_lines_count = 0
 
-# Function to replace matched lines and increment changed_lines_count if applicable
+# Function to check if a line should be replaced and to count the changed lines
 def replace_line(match):
     x_value = float(match.group(2))
     if x_value < threshold_value:
@@ -52,13 +52,29 @@ def replace_line(match):
     else:
         return match.group(0)
 
+# Function to determine if a G0 command should be retained
+def is_essential_g0_command(line):
+    return "F" in line or "Y" in line
+
 # Open the input file and read line by line
 with open(input_file_path, 'r') as input_file, open(output_file_path, 'w') as output_file:
+    previous_line = None
     for line in input_file:
         # Check if the line matches the regex and replace if necessary
         new_line = regex.sub(replace_line, line)
-        # Write the new line to the output file
-        output_file.write(new_line)
+
+        # If the previous line and the current line are both "G0" commands, and the previous line is not essential, skip writing the previous line
+        if previous_line and previous_line.startswith("G0") and new_line.startswith("G0") and not is_essential_g0_command(previous_line):
+            previous_line = new_line  # Replace the previous line with the current one
+        else:
+            # If there's a previous line stored, write it to the file
+            if previous_line:
+                output_file.write(previous_line)
+            previous_line = new_line  # Store the current line as the previous line
+
+    # Write the last stored line to the file
+    if previous_line:
+        output_file.write(previous_line)
 
 print(f'Processed lines have been saved to {output_file_path}.')
 print(f'Total number of changed lines: {changed_lines_count}')
