@@ -13,7 +13,7 @@
 #
 #         python sm_laser_mask.py your_gcode_file.nc output_gcode_file.nc 50
 #
-#         where 50 is the threshold value and should be between 1 and 100. I had great results with a value of 50 so far but
+#         where 50 is the threshold value and should be between 1 and 255. I had great results with a value of 50 so far but
 #         feel free to play around.
 #
 #         Then you can just import the generated .nc file back into Luban. That's it!
